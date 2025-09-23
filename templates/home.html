@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Fire Risk Prediction App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fira Code', monospace;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        .form-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        .form-group input {
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(255, 107, 107, 0.5);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: #888;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-family: 'Fira Code', monospace;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin: 2rem auto;
+            width: fit-content;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(45deg, #ff6b6b, #ffa726, #4ecdc4);
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .result-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .result-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fwi-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fwi-label {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+        }
+
+        .fwi-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .risk-level {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .risk-label {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+        }
+
+        .risk-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .risk-low {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .risk-moderate {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .risk-high {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .risk-very-high {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .risk-extreme {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9c27b0;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .risk-description {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            line-height: 1.5;
+        }
+
+        .recommendations {
+            grid-column: 1 / -1;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .recommendations h3 {
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+            text-align: center;
+        }
+
+        .recommendations ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .recommendations li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .recommendations li:before {
+            content: "•";
+            color: #4ecdc4;
+            position: absolute;
+            left: 0;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        .feature-card p {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .glass-card {
+                padding: 2rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <h1 class="title">🔥 Fire Risk Prediction</h1>
+            <p class="description">
+                Advanced machine learning model to predict fire risks based on environmental factors. 
+                Get accurate risk assessments using temperature, humidity, wind speed, and other critical parameters.
+            </p>
+            
+            <form id="predictionForm">
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°C)</label>
+                        <input type="number" id="temperature" name="temperature" placeholder="e.g., 25" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rh">Relative Humidity (%)</label>
+                        <input type="number" id="rh" name="rh" placeholder="e.g., 45" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wind">Wind Speed (km/h)</label>
+                        <input type="number" id="wind" name="wind" placeholder="e.g., 10" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rain">Rain (mm)</label>
+                        <input type="number" id="rain" name="rain" placeholder="e.g., 0.5" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ffmc">FFMC Index</label>
+                        <input type="number" id="ffmc" name="ffmc" placeholder="e.g., 85.2" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dmc">DMC Index</label>
+                        <input type="number" id="dmc" name="dmc" placeholder="e.g., 48.3" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="isi">ISI Index</label>
+                        <input type="number" id="isi" name="isi" placeholder="e.g., 8.5" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="classes">Classes</label>
+                        <input type="number" id="classes" name="classes" placeholder="e.g., 1" min="0" max="7" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="region">Region</label>
+                        <input type="number" id="region" name="region" placeholder="e.g., 1" min="0" max="10" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="cta-button">Predict Fire Risk</button>
+            </form>
+            
+            <div class="result-section" id="resultSection">
+                <div class="result-card">
+                    <h2 class="result-title">Fire Risk Assessment</h2>
+                    <div class="result-content">
+                        <div class="fwi-score">
+                            <div class="fwi-label">Fire Weather Index (FWI)</div>
+                            <div class="fwi-value" id="fwiValue">0.0</div>
+                            <div class="risk-description">A higher FWI indicates more severe fire weather conditions</div>
+                        </div>
+                        
+                        <div class="risk-level">
+                            <div class="risk-label">Risk Level</div>
+                            <div class="risk-value" id="riskValue">Low</div>
+                            <div class="risk-description" id="riskDescription">Conditions are favorable with minimal fire risk</div>
+                        </div>
+                        
+                        <div class="recommendations">
+                            <h3>Recommendations</h3>
+                            <ul id="recommendationsList">
+                                <li>Normal fire safety precautions are sufficient</li>
+                                <li>Continue regular monitoring of conditions</li>
+                                <li>Maintain fire safety equipment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🌡️</div>
+                <h3>Real-time Analysis</h3>
+                <p>Process environmental data in real-time for immediate risk assessment and alerts.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Accurate Predictions</h3>
+                <p>ML-powered algorithms trained on extensive wildfire data for reliable forecasting.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure & Reliable</h3>
+                <p>Enterprise-grade security protocols to ensure your data remains protected.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fire Weather Index (FWI) calculation function
+        function calculateFWI(temperature, humidity, wind, rain, ffmc, dmc, isi) {
+            // Simplified FWI calculation based on Canadian Forest Fire Weather Index
+            // In a real application, this would be more complex and accurate
+            
+            // Normalize inputs
+            const tempFactor = Math.max(0, temperature - 10) / 20; // Temperature above 10°C
+            const humidityFactor = Math.max(0, 50 - humidity) / 50; // Lower humidity increases risk
+            const windFactor = wind / 30; // Higher wind increases risk (capped at 30 km/h)
+            const rainFactor = Math.max(0, 1 - (rain / 5)); // Rain reduces risk
+            
+            // Calculate base FWI using the components
+            let fwi = (tempFactor * 5) + (humidityFactor * 3) + (windFactor * 4) + 
+                     (ffmc / 20) + (dmc / 50) + (isi / 10) + (rainFactor * 2);
+            
+            // Apply rain reduction more significantly if there's substantial rain
+            if (rain > 2) {
+                fwi *= (1 - (rain / 20));
+            }
+            
+            // Ensure FWI is between 0 and 30 (typical FWI range)
+            fwi = Math.max(0, Math.min(30, fwi));
+            
+            return fwi.toFixed(1);
+        }
+        
+        // Determine risk level based on FWI score
+        function getRiskLevel(fwi) {
+            if (fwi < 5) {
+                return {
+                    level: "Low",
+                    class: "risk-low",
+                    description: "Conditions are favorable with minimal fire risk",
+                    recommendations: [
+                        "Normal fire safety precautions are sufficient",
+                        "Continue regular monitoring of conditions",
+                        "Maintain fire safety equipment"
+                    ]
+                };
+            } else if (fwi < 10) {
+                return {
+                    level: "Moderate",
+                    class: "risk-moderate",
+                    description: "Moderate fire risk - exercise caution",
+                    recommendations: [
+                        "Increase monitoring of weather conditions",
+                        "Limit outdoor burning activities",
+                        "Ensure fire safety equipment is accessible"
+                    ]
+                };
+            } else if (fwi < 20) {
+                return {
+                    level: "High",
+                    class: "risk-high",
+                    description: "High fire risk - take precautions",
+                    recommendations: [
+                        "Avoid outdoor burning activities",
+                        "Prepare emergency evacuation plan",
+                        "Alert relevant authorities of elevated risk"
+                    ]
+                };
+            } else if (fwi < 27) {
+                return {
+                    level: "Very High",
+                    class: "risk-very-high",
+                    description: "Very high fire risk - extreme caution needed",
+                    recommendations: [
+                        "Implement fire ban restrictions",
+                        "Activate emergency response protocols",
+                        "Prepare for possible evacuation"
+                    ]
+                };
+            } else {
+                return {
+                    level: "Extreme",
+                    class: "risk-extreme",
+                    description: "Extreme fire risk - immediate action required",
+                    recommendations: [
+                        "Issue immediate evacuation orders if necessary",
+                        "Deploy all available firefighting resources",
+                        "Alert nearby communities of imminent danger"
+                    ]
+                };
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            const submitButton = document.querySelector('.cta-button');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Analyzing...';
+            submitButton.disabled = true;
+            
+            // Simulate API call/calculation delay
+            setTimeout(() => {
+                // Get form values
+                const temperature = parseFloat(document.getElementById('temperature').value);
+                const rh = parseFloat(document.getElementById('rh').value);
+                const wind = parseFloat(document.getElementById('wind').value);
+                const rain = parseFloat(document.getElementById('rain').value);
+                const ffmc = parseFloat(document.getElementById('ffmc').value);
+                const dmc = parseFloat(document.getElementById('dmc').value);
+                const isi = parseFloat(document.getElementById('isi').value);
+                
+                // Calculate FWI
+                const fwi = calculateFWI(temperature, rh, wind, rain, ffmc, dmc, isi);
+                
+                // Get risk level based on FWI
+                const riskInfo = getRiskLevel(fwi);
+                
+                // Display the results
+                document.getElementById('fwiValue').textContent = fwi;
+                
+                const riskValueElement = document.getElementById('riskValue');
+                riskValueElement.textContent = riskInfo.level;
+                riskValueElement.className = `risk-value ${riskInfo.class}`;
+                
+                document.getElementById('riskDescription').textContent = riskInfo.description;
+                
+                // Update recommendations
+                const recommendationsList = document.getElementById('recommendationsList');
+                recommendationsList.innerHTML = '';
+                riskInfo.recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.textContent = rec;
+                    recommendationsList.appendChild(li);
+                });
+                
+                // Show result section
+                document.getElementById('resultSection').style.display = 'block';
+                
+                // Scroll to result
+                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+                
+                // Reset button
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }, 1500);
+        });
+        
+        // Add some sample data for testing
+        window.addEventListener('DOMContentLoaded', (event) => {
+            // Pre-fill form with sample data for demonstration
+            document.getElementById('temperature').value = 28;
+            document.getElementById('rh').value = 35;
+            document.getElementById('wind').value = 15;
+            document.getElementById('rain').value = 0;
+            document.getElementById('ffmc').value = 88.6;
+            document.getElementById('dmc').value = 52.3;
+            document.getElementById('isi').value = 9.2;
+            document.getElementById('classes').value = 2;
+            document.getElementById('region').value = 3;
+        });
+    </script>
+</body>
+</html>
